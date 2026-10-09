@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>خضرة براند · من مطبخ غزة</title>
+<meta name="description" content="مونة بيتية من غزة: مخللات، عسل، مكسرات، تمور وحلويات. اطلب أونلاين وبتوصلك لباب بيتك.">
+<meta name="theme-color" content="#F4EFE4">
+<link rel="icon" href="assets/brand/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="preload" as="image" href="assets/scenes/scene-1-olive-v.webp" media="(max-width: 899px)">
+<link rel="preload" as="image" href="assets/scenes/scene-1-olive-h.webp" media="(min-width: 900px)">
+<link rel="stylesheet" href="css/site.css">
+<style>
+  /* المشاهد الخمسة ثابتة ورا الصفحة، والمحتوى بيمشي فوقها */
+  .stage { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #EFE6D4; }
+  .scene { position: absolute; inset: 0; opacity: 0; transition: opacity .9s ease; }
+  .scene.on { opacity: 1; }
+  .scene img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; transform-origin: 50% 22%; will-change: transform; }
+  #motes { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  /* عالموبايل: تدريج كريمي خفيف تحت، عشان الكلام يضل واضح فوق أي جزء من الصورة */
+  .stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom, rgba(244, 239, 228, 0) 50%, rgba(244, 239, 228, .55) 72%, rgba(244, 239, 228, .8) 100%); }
+  main { position: relative; z-index: 1; }
+
+  .copy { display: flex; flex-direction: column; gap: 12px; max-width: 540px; }
+  .kicker { display: flex; align-items: center; gap: 10px; color: var(--bronze); font-weight: 600; font-size: 14px; }
+  .kicker::before { content: ""; width: 28px; height: 1.5px; background: var(--bronze-line); }
+  .hero h1, .line { margin: 0; font-family: var(--display); font-weight: 700; color: var(--olive-deep); line-height: 1.2; text-wrap: balance; white-space: pre-line; }
+  .hero h1 { font-size: clamp(40px, 7vw, 86px); }
+  .line { font-size: clamp(36px, 6vw, 70px); }
+  .hero p, .window p.sub { margin: 0; color: #4A4234; max-width: 34ch; font-size: 15px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 2px; }
+  .actions .btn { height: 50px; padding-inline: 22px; }
+  .scroll-hint { display: none; color: var(--ink-soft); font-size: 13px; }
+
+  /* موبايل: الصورة فوق، والكلام بيثبت تحتها مباشرة (حوالي نص الشاشة) طول ما المشهد ظاهر */
+  :root { --ct: min(55svh, calc(100svh - var(--nav-h) - 250px)); }
+  .hero, .window { display: flex; flex-direction: column; }
+  .hero { min-height: calc(100svh - 74px - env(safe-area-inset-top, 0px)); }
+  .window { min-height: 128svh; }
+  .hero > .wrap, .window > .wrap { flex: 1; width: 100%; display: flex; flex-direction: column; padding-bottom: 24px; }
+  .hero > .wrap { justify-content: flex-end; }
+  .window > .wrap { justify-content: flex-start; padding-top: var(--ct); }
+  .hero .copy { position: sticky; bottom: calc(var(--nav-h) + 22px + env(safe-area-inset-bottom, 0px)); will-change: opacity; }
+  .window .copy { position: sticky; top: var(--ct); will-change: opacity; }
+  .window .actions .btn { height: 48px; }
+  .picks { display: none; }
+
+  @media (min-width: 900px) {
+    .stage::after { display: none; }
+    .scene img { object-position: left top; transform-origin: 25% 20%; }
+    .hero, .window { min-height: 100svh; justify-content: center; }
+    .hero { min-height: calc(100svh - 94px); }
+    .hero > .wrap, .window > .wrap { flex: 0 0 auto; justify-content: center; align-items: flex-start; padding-block: 40px; }
+    .hero .copy, .window .copy { position: relative; top: auto; bottom: auto; max-width: 560px; }
+    .window > .wrap { padding-top: 40px; }
+    /* لمسة اللابتوب: هالة كريمية ورا الكلام، وأصناف من نفس المشهد */
+    .window .copy::before { content: ""; position: absolute; inset: -90px -120px; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgba(251, 248, 241, .6), rgba(251, 248, 241, 0)); }
+    .line { margin-bottom: 4px; }
+    .picks { display: flex; gap: 10px; margin-top: 10px; }
+    .picks:empty { display: none; }
+    .pick { flex: 0 1 250px; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border-radius: 18px; text-decoration: none; color: var(--ink); background: rgba(251, 248, 241, .82); border: 1px solid rgba(164, 126, 78, .22); box-shadow: 0 10px 30px rgba(74, 52, 16, .08); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: transform .2s, box-shadow .2s; }
+    .pick:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(74, 52, 16, .12); }
+    .pick img { width: 58px; height: 58px; border-radius: 13px; object-fit: cover; flex: none; background: var(--cream-2); }
+    .pick .t { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.45; }
+    .pick b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pick small { color: var(--bronze); font-weight: 700; font-size: 14px; }
+    .pick .go { flex: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--olive); color: var(--paper); }
+    .pick .go svg { width: 16px; height: 16px; }
+    .hero p, .window p.sub { font-size: 18px; }
+    .scroll-hint { display: block; }
+    .kicker { font-size: 15px; }
+  }
+
+  .panel { position: relative; background: var(--cream); border-radius: 28px; padding-block: 30px 36px; box-shadow: 0 -10px 40px rgba(74, 52, 16, .07); }
+  @media (min-width: 900px) { .panel { border-radius: 36px; padding-block: 48px 56px; } }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .step { background: var(--paper); border: 1px solid #E6DCC8; border-radius: 18px; padding: 14px 16px; display: flex; gap: 14px; align-items: center; }
+  .step .n { flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--olive); color: var(--paper); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .step b { display: block; }
+  .step span { color: var(--ink-soft); font-size: 14px; }
+  .pay-line { margin: 14px 0 0; color: var(--ink-soft); font-size: 14px; }
+  .pay-line:empty { display: none; }
+  .panel .cta { margin-top: 16px; }
+  @media (max-width: 899px) { .panel .cta { width: 100%; } }
+</style>
+</head>
+<body>
+<div class="stage" aria-hidden="true">
+  <picture class="scene on" data-s="1"><source media="(min-width: 900px)" srcset="assets/scenes/scene-1-olive-h.webp"><img src="assets/scenes/scene-1-olive-v.webp" alt=""></picture>
+  <picture class="scene" data-s="2"><source media="(min-width: 900px)" srcset="assets/scenes/scene-2-honey-h.webp"><img src="assets/scenes/scene-2-honey-v.webp" alt="" loading="lazy"></picture>
+  <picture class="scene" data-s="3"><source media="(min-width: 900px)" srcset="assets/scenes/scene-3-hands-h.webp"><img src="assets/scenes/scene-3-hands-v.webp" alt="" loading="lazy"></picture>
+  <picture class="scene" data-s="4"><source media="(min-width: 900px)" srcset="assets/scenes/scene-4-jars-h.webp"><img src="assets/scenes/scene-4-jars-v.webp" alt="" loading="lazy"></picture>
+  <picture class="scene" data-s="5"><source media="(min-width: 900px)" srcset="assets/scenes/scene-5-sofra-h.webp"><img src="assets/scenes/scene-5-sofra-v.webp" alt="" loading="lazy"></picture>
+  <canvas id="motes"></canvas>
+</div>
+
+<div id="chrome-top"></div>
+
+<main>
+  <section class="hero" data-scene="1" aria-label="الواجهة">
+    <div class="wrap"><div class="copy">
+      <span class="kicker">من مطبخ غزة</span>
+      <h1 data-line="1">كل مرطبان
+بلّش بشجرة</h1>
+      <p>مونة بيتية من مطبخنا بغزة: مخللات، عسل، مكسرات، تمور وحلويات، بتوصل لباب بيتك.</p>
+      <div class="actions">
+        <a class="btn" href="shop.html">تسوّق الآن</a>
+        <a class="btn ghost" href="#best">الأكثر طلباً</a>
+      </div>
+      <span class="scroll-hint">انزل وكمّل الحكاية ↓</span>
+    </div></div>
+  </section>
+
+  <section class="window" data-scene="2" aria-label="العسل">
+    <div class="wrap"><div class="copy">
+      <p class="line" data-line="2">من أرض غزة،
+على مهلها</p>
+      <p class="sub">اختار الحجم اللي بيناسبك، وبيوصلك لباب البيت.</p>
+      <div class="actions"><a class="btn" href="shop.html" data-cat-match="عسل">تسوّق العسل</a></div>
+      <div class="picks" data-picks="عسل"></div>
+    </div></div>
+  </section>
+
+  <section class="panel" id="best" aria-label="الأقسام والأكثر طلباً">
+    <div class="wrap">
+      <div class="sec-h"><h2>تسوّق حسب القسم</h2><a href="shop.html">كل المنتجات</a></div>
+      <div class="cats" id="cats"><div class="skeleton" style="width:100%;height:110px"></div></div>
+      <div class="sec-h" style="margin-top:40px"><h2>الأكثر طلباً</h2><a href="shop.html">عرض الكل</a></div>
+      <div class="grid" id="featured"><div class="skeleton" style="height:260px"></div><div class="skeleton" style="height:260px"></div></div>
+    </div>
+  </section>
+
+  <section class="window" data-scene="3" aria-label="الإيدين">
+    <div class="wrap"><div class="copy">
+      <p class="line" data-line="3">بإيدين
+بتعرف الطعمة</p>
+      <p class="sub">كل دفعة بتنعمل بمطبخنا خطوة بخطوة.</p>
+      <div class="actions"><a class="btn ghost" id="igBtn" href="https://www.instagram.com/khadra_brand25.4/" target="_blank" rel="noopener">شوف كيف بنعمله على انستغرام</a></div>
+    </div></div>
+  </section>
+
+  <section class="panel" aria-label="كيف تطلب">
+    <div class="wrap">
+      <div class="sec-h"><h2>كيف بتطلب؟</h2></div>
+      <div class="steps">
+        <div class="step"><span class="n">١</span><div><b>اختار من المتجر</b><span>الصنف والحجم اللي بدك إياه.</span></div></div>
+        <div class="step"><span class="n">٢</span><div><b>اطلب من السلة</b><span>اسمك ورقمك وعنوانك، وبس.</span></div></div>
+        <div class="step"><span class="n">٣</span><div><b>بنأكدلك عالواتساب</b><span>بنحكيلك موعد التوصيل، وبنوصلك لباب البيت.</span></div></div>
+      </div>
+      <p class="pay-line" id="payLine"></p>
+      <a class="btn cta" href="shop.html">ابدأ التسوق</a>
+    </div>
+  </section>
+
+  <section class="window" data-scene="4" aria-label="الدفعة">
+    <div class="wrap"><div class="copy">
+      <p class="line" data-line="4">بيتعبّى طازة،
+دفعة بدفعة</p>
+      <p class="sub">فلفل، ليمون ومشكّل… اختار مخللك.</p>
+      <div class="actions"><a class="btn" href="shop.html" data-cat-match="مخلل">تسوّق المخللات</a></div>
+      <div class="picks" data-picks="مخلل"></div>
+    </div></div>
+  </section>
+
+  <section class="window" data-scene="5" aria-label="السفرة">
+    <div class="wrap"><div class="copy">
+      <p class="line" data-line="5">وبتوصل
+لسفرتك</p>
+      <div class="actions"><a class="btn" href="shop.html">تسوّق الآن</a></div>
+    </div></div>
+  </section>
+</main>
+
+<div id="chrome-bottom"></div>
+<script type="module" src="js/site/home.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>خضرة براند</title>
+<meta name="theme-color" content="#F4EFE4">
+<link rel="icon" href="assets/brand/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/site.css">
+<style>
+  main { padding-bottom: 32px; }
+  .pgrid { display: grid; gap: 18px; }
+  @media (min-width: 900px) { .pgrid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px; align-items: start; } .gallery { position: sticky; top: 104px; } }
+  .gallery { margin-inline: -16px; }
+  .gallery .main { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: var(--cream-2); }
+  .gallery .main img, .gallery .main video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumbs { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-inline: 16px; scrollbar-width: none; }
+  .thumbs button { flex: none; width: 60px; height: 60px; border-radius: 12px; overflow: hidden; border: 2px solid transparent; padding: 0; cursor: pointer; background: var(--cream-2); }
+  .thumbs button[aria-pressed="true"] { border-color: var(--olive); }
+  .thumbs img { width: 100%; height: 100%; object-fit: cover; }
+  @media (min-width: 600px) { .gallery { margin-inline: 0; } .gallery .main { border-radius: 24px; } .thumbs { padding-inline: 0; } }
+  .vid-btn { position: absolute; bottom: 12px; inset-inline-start: 12px; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding-inline: 14px; border-radius: 18px; border: 0; background: rgba(29, 25, 18, .75); color: var(--paper); font-weight: 600; cursor: pointer; }
+  .info { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .crumb { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--bronze); text-decoration: none; }
+  .crumb svg { width: 18px; height: 18px; }
+  .info h1 { margin: -6px 0 0; font-size: clamp(26px, 3.4vw, 36px); line-height: 1.35; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { height: 28px; padding-inline: 12px; border-radius: 14px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; }
+  .pill.batch { border: 1px solid #C9A97A; color: #6B4A1E; }
+  .desc { margin: 0; color: #4A4234; }
+  .opt { display: flex; flex-direction: column; gap: 8px; }
+  .lbl { font-weight: 700; margin: 0; }
+  .sizes { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+  .size { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: 10px 12px; border-radius: 14px; border: 1.5px solid var(--line-strong); background: var(--paper); cursor: pointer; text-align: start; transition: border-color .15s, background .15s; }
+  .size b { font-weight: 600; font-size: 15px; }
+  .size span { font-size: 13px; color: var(--bronze); font-weight: 600; }
+  .size[aria-pressed="true"] { border-color: var(--olive); background: #EEF2E2; box-shadow: inset 0 0 0 1px var(--olive); }
+  .size[aria-pressed="true"]::after { content: ""; position: absolute; top: 8px; inset-inline-end: 8px; width: 16px; height: 16px; border-radius: 50%; background: var(--olive) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FBF8F1' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 11px no-repeat; }
+  .pricebox { display: flex; align-items: baseline; gap: 10px; }
+  .pricebox .price { font-size: 26px; }
+  .buybar { display: flex; gap: 10px; align-items: center; }
+  .stepper { flex: none; display: inline-flex; align-items: center; gap: 2px; border: 1.5px solid var(--line-strong); border-radius: 14px; background: var(--paper); height: 52px; padding-inline: 4px; }
+  .stepper button { width: 40px; height: 42px; border: 0; background: transparent; border-radius: 10px; cursor: pointer; color: var(--olive-deep); display: flex; align-items: center; justify-content: center; }
+  .stepper output { min-width: 24px; text-align: center; font-weight: 700; font-size: 17px; }
+  .buybar .btn { flex: 1; min-width: 0; padding-inline: 14px; }
+  .buybar .btn .sum { font-weight: 700; opacity: .9; padding-inline-start: 8px; margin-inline-start: 2px; border-inline-start: 1px solid rgba(251, 248, 241, .35); }
+  @media (max-width: 899px) {
+    .buybar { position: sticky; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 10px); z-index: 4; background: rgba(251, 248, 241, .97); border: 1px solid var(--line); border-radius: 20px; padding: 8px; box-shadow: 0 10px 30px rgba(74, 52, 16, .14); }
+  }
+  .acc details { border-top: 1px solid var(--line); }
+  .acc details:last-of-type { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; padding-block: 14px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; font-size: 20px; line-height: 1; color: var(--bronze); }
+  details[open] summary::after { content: "−"; }
+  details p { margin: 0 0 14px; color: #4A4234; white-space: pre-line; }
+  .related { margin-top: 40px; }
+</style>
+</head>
+<body>
+<div id="chrome-top"></div>
+<main class="wrap" id="main">
+  <div class="pgrid">
+    <div class="skeleton" style="aspect-ratio:1/1"></div>
+    <div><div class="skeleton" style="height:40px;margin-bottom:12px"></div><div class="skeleton" style="height:120px"></div></div>
+  </div>
+</main>
+<div id="chrome-bottom"></div>
+<script type="module" src="js/site/product.js"></script>
+</body>
+</html>

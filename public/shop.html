@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>المتجر · خضرة براند</title>
+<meta name="theme-color" content="#F4EFE4">
+<link rel="icon" href="assets/brand/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/site.css">
+<style>
+  .filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin: 0 -16px 14px; padding-inline: 16px; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filters .chip { flex: none; }
+  .tools { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .tools .search { flex: 1 1 auto; min-width: 0; position: relative; }
+  .tools .search .input { height: 48px; padding-inline-start: 42px; }
+  .tools .search svg { position: absolute; inset-inline-start: 14px; top: 50%; transform: translateY(-50%); width: 19px; height: 19px; color: var(--ink-soft); pointer-events: none; }
+  .tools .fs { flex: 0 0 150px; }
+  .tools .fs .input { height: 48px; font-size: 15px; }
+  @media (min-width: 600px) { .tools .fs { flex-basis: 200px; } .filters { margin-inline: 0; padding-inline: 0; } }
+  main { padding-bottom: 48px; }
+</style>
+</head>
+<body>
+<div id="chrome-top"></div>
+<main class="wrap">
+  <div class="page-h"><h1 id="title">المتجر</h1></div>
+  <div class="filters" id="filters" role="group" aria-label="الأقسام"></div>
+  <div class="tools">
+    <div class="search">
+      <label class="sr-only" for="q">بحث</label>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+      <input class="input" id="q" type="search" placeholder="دوّر على صنف…">
+    </div>
+    <select class="input" id="sort" data-title="رتّب حسب" aria-label="الترتيب">
+      <option value="order">المقترح</option>
+      <option value="low">الأرخص أول</option>
+      <option value="high">الأغلى أول</option>
+    </select>
+  </div>
+  <div class="grid" id="grid"><div class="skeleton" style="height:260px"></div><div class="skeleton" style="height:260px"></div></div>
+</main>
+<div id="chrome-bottom"></div>
+<script type="module" src="js/site/shop.js"></script>
+</body>
+</html>

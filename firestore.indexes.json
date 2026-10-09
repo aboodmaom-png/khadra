@@ -1,0 +1,25 @@
+{
+  "indexes": [
+    { "collectionGroup": "orders", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" } ] },
+    { "collectionGroup": "orders", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "deliveryDate", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "ASCENDING" } ] },
+    { "collectionGroup": "products", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "visible", "order": "ASCENDING" }, { "fieldPath": "order", "order": "ASCENDING" } ] },
+    { "collectionGroup": "products", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "categoryId", "order": "ASCENDING" }, { "fieldPath": "visible", "order": "ASCENDING" }, { "fieldPath": "order", "order": "ASCENDING" } ] },
+    { "collectionGroup": "categories", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "visible", "order": "ASCENDING" }, { "fieldPath": "order", "order": "ASCENDING" } ] },
+    { "collectionGroup": "boxes", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "visible", "order": "ASCENDING" }, { "fieldPath": "order", "order": "ASCENDING" } ] },
+    { "collectionGroup": "areas", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "active", "order": "ASCENDING" }, { "fieldPath": "order", "order": "ASCENDING" } ] },
+    { "collectionGroup": "reviews", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "visible", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" } ] },
+    { "collectionGroup": "stockLog", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "productId", "order": "ASCENDING" }, { "fieldPath": "at", "order": "DESCENDING" } ] },
+    { "collectionGroup": "batches", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "productId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" } ] }
+  ],
+  "fieldOverrides": []
+}

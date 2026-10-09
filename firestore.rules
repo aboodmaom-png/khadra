@@ -1,0 +1,196 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ================= أدوات =================
+
+    // الأدمن: أي مستخدم إله مستند بـ admins/{uid} (بينضاف يدوياً من Firebase Console)
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function shortStr(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+    // حقل اختياري: يا مش موجود، يا نص قصير
+    function optStr(d, k, max) {
+      return !(k in d) || shortStr(d[k], 0, max);
+    }
+    function money(v) {
+      return v is number && v >= 0 && v <= 100000;
+    }
+    function settings() {
+      return get(/databases/$(database)/documents/settings/main).data;
+    }
+
+    // ================= للكل (قراءة) / للأدمن (كتابة) =================
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // إعدادات المتجر: رقم الواتساب، فاتح/مسكّر، طرق الدفع، رسائل جاهزة...
+    match /settings/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{id} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // المنتجات: فيها الأحجام والأسعار والمخزون (المخزون مش سري). التكلفة بـ productCosts
+    match /products/{id} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // قوالب "ركّب علبتك" والعلب الجاهزة
+    match /boxes/{id} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // مناطق التوصيل ورسومها
+    match /areas/{id} {
+      allow read: if resource.data.active == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // محتوى الموقع: ريلز، نصوص القصة، شريط الإعلان...
+    match /media/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // الكوبونات: الزائر بيقدر يفحص كود معيّن بس (get)، وما بيقدر يشوف قائمة الأكواد
+    match /coupons/{code} {
+      allow get: if resource.data.active == true || isAdmin();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ================= الطلبات =================
+
+    // عدّاد أرقام الطلبات: الزائر بيقدر يزيده بواحد بس، وبس إذا انعمل طلب بنفس الرقم بنفس العملية
+    match /counters/orders {
+      allow get: if true;
+      allow list: if false;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['next']) &&
+        request.resource.data.next == resource.data.next + 1 &&
+        existsAfter(/databases/$(database)/documents/orders/$('KH-' + string(resource.data.next)))
+      );
+    }
+
+    // الطلب نفسه: الزائر بينشئ بس، وما بيقدر يقرأ طلبه ولا طلبات غيره. القراءة والتعديل للأدمن
+    match /orders/{orderId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if isAdmin() || validNewOrder(orderId, request.resource.data);
+    }
+
+    // صفحة تتبع الطلب: مستند بـ ID عشوائي طويل. مسموح get برابطه، وممنوع list
+    match /orderStatus/{trackId} {
+      allow get: if true;
+      allow list, update, delete: if isAdmin();
+      allow create: if isAdmin() || validNewStatus(trackId, request.resource.data);
+    }
+
+    function validCustomer(c) {
+      return c is map && c.keys().hasOnly(['name', 'phone']) &&
+        shortStr(c.name, 2, 80) &&
+        shortStr(c.phone, 7, 20);
+    }
+
+    function validNewOrder(orderId, d) {
+      let s = settings();
+      let counterBefore = get(/databases/$(database)/documents/counters/orders).data;
+      let counterAfter = getAfter(/databases/$(database)/documents/counters/orders).data;
+      let area = get(/databases/$(database)/documents/areas/$(d.areaId)).data;
+      return s.storeOpen == true &&
+        d.keys().hasAll(['number', 'trackId', 'customer', 'areaId', 'areaName', 'address',
+                         'items', 'subtotal', 'deliveryFee', 'discount', 'total',
+                         'payMethod', 'status', 'createdAt', 'source']) &&
+        d.keys().hasOnly(['number', 'trackId', 'customer', 'areaId', 'areaName', 'address',
+                          'note', 'preferredSlot', 'items', 'subtotal', 'deliveryFee',
+                          'discount', 'coupon', 'total', 'payMethod', 'hasPreorder',
+                          'maxPrepDays', 'status', 'createdAt', 'source']) &&
+        // رقم الطلب لازم يكون الرقم الجاي بالعدّاد، والعدّاد زاد بنفس العملية
+        d.number is int &&
+        d.number == counterBefore.next &&
+        counterAfter.next == d.number + 1 &&
+        orderId == 'KH-' + string(d.number) &&
+        // مستند التتبع انعمل بنفس العملية
+        shortStr(d.trackId, 20, 40) &&
+        existsAfter(/databases/$(database)/documents/orderStatus/$(d.trackId)) &&
+        validCustomer(d.customer) &&
+        // المنطقة موجودة ومفعّلة، ورسوم التوصيل نفس رسومها (أو صفر إذا وصل لحد التوصيل المجاني)
+        shortStr(d.areaId, 1, 60) &&
+        area.active == true &&
+        shortStr(d.areaName, 1, 60) &&
+        (d.deliveryFee == area.fee ||
+          (d.deliveryFee == 0 && s.freeDeliveryMin > 0 && d.subtotal >= s.freeDeliveryMin)) &&
+        shortStr(d.address, 3, 300) &&
+        optStr(d, 'note', 500) &&
+        optStr(d, 'preferredSlot', 20) &&
+        optStr(d, 'coupon', 30) &&
+        d.items is list && d.items.size() >= 1 && d.items.size() <= 40 &&
+        money(d.subtotal) && money(d.deliveryFee) && money(d.discount) && money(d.total) &&
+        // طريقة الدفع لازم تكون مفعّلة بالإعدادات
+        d.payMethod in ['cash', 'transfer'] &&
+        s.payMethods[d.payMethod] == true &&
+        (!('hasPreorder' in d) || d.hasPreorder is bool) &&
+        (!('maxPrepDays' in d) || (d.maxPrepDays is int && d.maxPrepDays >= 0 && d.maxPrepDays <= 60)) &&
+        d.status == 'new' &&
+        d.source == 'website' &&
+        d.createdAt == request.time;
+      // ملاحظة: تفاصيل الأصناف وأسعارها ما بتنفحص هون (القواعد ما فيها loops).
+      // لوحة التحكم بتعيد حساب المجموع من الأسعار الحقيقية قبل التأكيد، وبتنبّه لأي فرق.
+    }
+
+    function validNewStatus(trackId, d) {
+      return d.keys().hasOnly(['orderId', 'number', 'status', 'createdAt']) &&
+        d.number is int &&
+        d.orderId == 'KH-' + string(d.number) &&
+        d.status == 'new' &&
+        d.createdAt == request.time &&
+        getAfter(/databases/$(database)/documents/orders/$(d.orderId)).data.trackId == trackId;
+    }
+
+    // ================= آراء الزباين =================
+    // الزائر بيقدر يكتب رأي بس بيوصل مخفي، وصاحب البراند بيوافق عليه
+    match /reviews/{id} {
+      allow read: if resource.data.visible == true || isAdmin();
+      allow update, delete: if isAdmin();
+      allow create: if isAdmin() || validReview(request.resource.data);
+    }
+    function validReview(d) {
+      return d.keys().hasOnly(['name', 'text', 'stars', 'area', 'productId', 'visible', 'source', 'createdAt']) &&
+        shortStr(d.name, 1, 40) &&
+        shortStr(d.text, 5, 400) &&
+        d.stars is int && d.stars >= 1 && d.stars <= 5 &&
+        optStr(d, 'area', 40) &&
+        optStr(d, 'productId', 60) &&
+        d.visible == false &&
+        d.source == 'website' &&
+        d.createdAt == request.time;
+    }
+
+    // ================= للأدمن فقط =================
+    // تكلفة المنتجات (ما لازم تبين للزوار)
+    match /productCosts/{id} { allow read, write: if isAdmin(); }
+    // الزباين (بيتبنوا لحالهم من الطلبات)
+    match /customers/{id} { allow read, write: if isAdmin(); }
+    // دفعات التعبئة
+    match /batches/{id} { allow read, write: if isAdmin(); }
+    // سجل حركات المخزون
+    match /stockLog/{id} { allow read, write: if isAdmin(); }
+    // البيعات (فيها التكلفة والربح)
+    match /sales/{id} { allow read, write: if isAdmin(); }
+    // علامات ✓ بقائمة التحضير لكل يوم
+    match /prep/{day} { allow read, write: if isAdmin(); }
+  }
+}
